@@ -91,6 +91,14 @@ def wordcloud_from_themes(themes: pd.DataFrame, n: int = 60):
     if themes is None or themes.empty or "theme" not in themes:
         return None
     df = themes.copy()
-    df["label"] = (df["theme"].astype(str).str.replace("_", " ").str.title())
+    # Defensive: GDELT's raw V2Themes entries are "THEME_NAME,charoffset". The
+    # BigQuery query (src/ingest/gdelt_bq.py) now strips this at the source, but
+    # snapshots written before that fix still carry the offset glued to the theme
+    # name (e.g. "TAX_WORLDLANGUAGES_AZERBAIJAN,16") — strip it here too so
+    # already-stored data renders correctly without requiring a fresh backfill.
+    # The groupby+sum below then correctly re-merges what were spurious
+    # theme+offset fragments of the same real theme.
+    theme_name = df["theme"].astype(str).str.split(",", n=1).str[0]
+    df["label"] = theme_name.str.replace("_", " ").str.title()
     df = df.groupby("label")["count"].sum().sort_values(ascending=False).head(n)
     return _render_cloud(df.to_dict())

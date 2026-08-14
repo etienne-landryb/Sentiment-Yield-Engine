@@ -413,11 +413,21 @@ def _analytical_from_snapshot(sent_rows: pd.DataFrame, region: str, country: str
     daily = detect_events(daily, z_thresh=ev.get("z_thresh", 2.0), window=ev.get("window", 30))
 
     days_in_window = max((pd.to_datetime(end) - pd.to_datetime(start)).days, 1)
+    # Snapshot mode (tone-only) has NO per-article data, so 3 of the formula's 5
+    # inputs (source diversity, duplicate cleanliness, scoring success) genuinely
+    # can't be measured here. Feeding them values that saturate their component to
+    # 1.0 (as if perfectly diverse/deduped/scored) would silently inflate the score
+    # to look like a full 5-dimension measurement when only volume + coverage are
+    # real. Instead: hhi=1.0 -> diversity=0, duplicate_rate=1.0 -> duplicate=0, and
+    # scored=0/total=1 -> scoring=0 — "no signal measured" gets 0 credit, the same
+    # convention data_quality() already uses for a missing/zero denominator
+    # elsewhere. The formula and its weights are UNCHANGED (README methodology);
+    # only these snapshot-specific inputs are honest about what wasn't measured.
     dq = data_quality(
         {"article_count": float(np.nansum(daily["article_count"])),
-         "hhi": 0.0, "duplicate_rate": 0.0,
+         "hhi": 1.0, "duplicate_rate": 1.0,
          "days_with_data": int(daily["date"].nunique()), "days_in_window": days_in_window,
-         "scored_headlines": 1, "total_headlines": 1},   # tone series is fully "scored"
+         "scored_headlines": 0, "total_headlines": 1},
         q["weights"], q["target"])
     daily["data_quality_score"] = dq
 

@@ -32,6 +32,10 @@ TYPE_LABEL = {"fx": "Currency (FX vs USD)", "index": "Equity index", "yield": "Y
 REGIME_ICON = {"floating": "🟢", "pegged": "🔵", "dollarized": "🟠", "unlinked": "⚪"}
 REGIME_SHORT = {"floating": "Own currency", "pegged": "Pegged", "dollarized": "Dollarized",
                 "unlinked": "Sentiment only"}
+# UX Pass 3, Gap 3 — above this many selected entities, the overview's headline
+# correlation section switches from one-card-per-country to a compact sortable
+# table (the card layout is genuinely useful at small scale, unusable at 196).
+HEADLINE_CARD_LIMIT = 10
 
 HONESTY_NOTES = [
     "**Sentiment basis** — production sentiment is GDELT **average tone** on a *co-mention* "
@@ -150,19 +154,65 @@ all_countries = settings.countries()
 region_label = {rid: r["label"] for rid, r in regions.items()}
 country_label = {c["id"]: c["label"] for c in all_countries}
 country_region = {c["id"]: c["region"] for c in all_countries}
+_countries_by_region = {
+    rid: [c["id"] for c in all_countries if c["region"] == rid] for rid in region_label
+}
+
+
+def _default_selection() -> set:
+    """UX Pass 3, Gap 4 — at 196 countries, defaulting to "everything selected"
+    means a 196-way render on first load. Default instead to entities that carry
+    at least one real market instrument (the "headline" correlation story has
+    something to show for them); the rest are one click away via "Select all"."""
+    return {c["id"] for c in all_countries if c.get("instruments")}
+
+
+def _region_widget_key(rid: str) -> str:
+    return f"ms_region_{rid}"
 
 
 def sidebar_selection():
     with st.sidebar:
         st.header("Controls")
-        picked_regions = st.pills("Regions", list(region_label), format_func=region_label.get,
-                                  selection_mode="multi", default=list(region_label)) or list(region_label)
-        st.divider()
-        opts = [c["id"] for c in all_countries if country_region[c["id"]] in picked_regions]
-        picked = st.multiselect(
-            "Countries", opts,
-            format_func=lambda cid: f"{region_label[country_region[cid]]} — {country_label[cid]}",
-            default=opts)
+
+        default_ids = _default_selection()
+        for rid in region_label:
+            key = _region_widget_key(rid)
+            if key not in st.session_state:
+                st.session_state[key] = [cid for cid in _countries_by_region[rid] if cid in default_ids]
+
+        top1, top2 = st.columns(2)
+        if top1.button("Select all", use_container_width=True):
+            for rid in region_label:
+                st.session_state[_region_widget_key(rid)] = list(_countries_by_region[rid])
+            st.rerun()
+        if top2.button("Select none", use_container_width=True):
+            for rid in region_label:
+                st.session_state[_region_widget_key(rid)] = []
+            st.rerun()
+
+        st.caption(f"Default selection: {len(default_ids)} of {len(all_countries)} countries "
+                   "with a real market instrument (FX and/or index).")
+
+        picked: list[str] = []
+        for rid, label in region_label.items():
+            key = _region_widget_key(rid)
+            region_ids = _countries_by_region[rid]
+            n_selected = len(st.session_state.get(key, []))
+            with st.expander(f"{label} ({n_selected}/{len(region_ids)})", expanded=False):
+                r1, r2 = st.columns(2)
+                if r1.button("All", key=f"all_{rid}", use_container_width=True):
+                    st.session_state[key] = list(region_ids)
+                    st.rerun()
+                if r2.button("None", key=f"none_{rid}", use_container_width=True):
+                    st.session_state[key] = []
+                    st.rerun()
+                # Native multiselect — type-to-search within this region's countries
+                # still works exactly as before, just scoped per region now.
+                st.multiselect("Countries", region_ids, key=key, label_visibility="collapsed",
+                               format_func=country_label.get)
+            picked.extend(st.session_state.get(key, []))
+
         st.divider()
         period = st.pills("Period (days back)", [30, 60, 90, 180], default=90) or 90
     return picked, period
@@ -203,21 +253,40 @@ def render_overview(entities: dict):
     st.subheader("The headline: sentiment × market correlation")
     st.caption("First available instrument per entity. `lag>0` → sentiment leads the market.")
     ids = list(entities)
-    cols = st.columns(min(4, len(ids)) or 1)
-    for i, cid in enumerate(ids):
-        b = entities[cid]
-        caps = capabilities(b)
-        label, entry = first_ok(b)
-        with cols[i % len(cols)]:
-            if not caps["market"] or not entry:
-                st.metric(b["label"], "—", help="no market data available")
-                st.caption(regime_badge(b))
-                continue
-            corr = entry["correlation"]; bl = corr["best_lag"]
-            tag = " ·bloc" if b.get("is_aggregate") else ""
-            st.metric(f"{b['label']}{tag} · {label}", f"r={_fmt(corr['pearson'],2)}",
-                      delta=f"peak lag {bl['lag']} (r={_fmt(bl['corr'],2)})", delta_color="off")
-            st.caption(f"n={corr['n']}, band ±{_fmt(corr['band'],2)}")
+    if len(ids) <= HEADLINE_CARD_LIMIT:
+        cols = st.columns(min(4, len(ids)) or 1)
+        for i, cid in enumerate(ids):
+            b = entities[cid]
+            caps = capabilities(b)
+            label, entry = first_ok(b)
+            with cols[i % len(cols)]:
+                if not caps["market"] or not entry:
+                    st.metric(b["label"], "—", help="no market data available")
+                    st.caption(regime_badge(b))
+                    continue
+                corr = entry["correlation"]; bl = corr["best_lag"]
+                tag = " ·bloc" if b.get("is_aggregate") else ""
+                st.metric(f"{b['label']}{tag} · {label}", f"r={_fmt(corr['pearson'],2)}",
+                          delta=f"peak lag {bl['lag']} (r={_fmt(bl['corr'],2)})", delta_color="off")
+                st.caption(f"n={corr['n']}, band ±{_fmt(corr['band'],2)}")
+    else:
+        # too many entities for cards to be usable — a compact, sortable table with
+        # the map (Compare & map) staying as the primary overview visual at this scale.
+        table = pipeline.build_comparison(entities, ids)
+        if not table.empty:
+            show = table.copy()
+            show["Region"] = show["region"].map(region_label).fillna(show["region"])
+            show = show.rename(columns={
+                "country": "Entity", "sentiment_mean": "Sentiment",
+                "market": "Best instrument", "pearson": "r", "best_lag": "Lag"})
+            show = show[["Entity", "Region", "Sentiment", "Best instrument", "r", "Lag"]]
+            st.dataframe(show.sort_values("Sentiment", ascending=False, na_position="last"),
+                        use_container_width=True, hide_index=True, height=420,
+                        column_config={
+                            "Sentiment": st.column_config.NumberColumn(format="%.3f"),
+                            "r": st.column_config.NumberColumn(format="%.2f")})
+        st.caption(f"{len(ids)} entities selected — showing a sortable table above the "
+                   f"{HEADLINE_CARD_LIMIT}-country card threshold. See Compare & map for the world view.")
 
     focus = st.selectbox("Show lead/lag detail for", ids, format_func=lambda cid: entities[cid]["label"])
     focus_entity = entities[focus]
@@ -481,19 +550,11 @@ def render_methodology(_entities: dict):
         st.markdown("- " + note)
 
 
-def render_diagnostics(entities: dict):
-    """Behind-the-scenes recorder: the full GDELT HTTP trace + instrument outcomes.
-
-    Prefers the live build's `diag` (which carries artlist/tone http_status+error);
-    falls back to deriving basics from the bundle for demo/aggregate entities. The
-    JSON download is the complete artifact to paste back for analysis.
-    """
-    import json
-
-    rows, full = [], {}
+def _diagnostics_rows_live(entities: dict) -> list[dict]:
+    """Live/live(cached) mode: the GDELT HTTP trace (artlist/tone status+error)."""
+    rows = []
     for cid, b in entities.items():
         d = b.get("diag") or {}
-        full[cid] = d or {"note": "no live diag (demo or aggregate)"}
         adf = b.get("analytical")
         arts = b.get("articles")
         art = d.get("artlist") or {}
@@ -522,11 +583,62 @@ def render_diagnostics(entities: dict):
                 + (f"/{v['reason']}" if v.get("reason") else "")
                 for l, v in insts.items()),
         })
+    return rows
 
-    with st.expander("🔧 Run diagnostics (full GDELT trace + instrument outcomes)"):
-        st.caption("Live builds also log `BUILD DIAG …` to Streamlit Cloud → Manage app → logs. "
-                   "`artlist_http`/`tone_http` show the actual GDELT HTTP status (429 = rate-limited, "
-                   "200 with 0 articles = query returned nothing).")
+
+def _diagnostics_rows_snapshot(entities: dict) -> list[dict]:
+    """Snapshot/demo mode: nothing was fetched live, so show what the snapshot/bundle
+    actually holds — sentiment rows, distinct days, last refresh, instrument
+    availability, and the regime label — not a live-fetch trace that never ran."""
+    rows = []
+    for cid, b in entities.items():
+        d = b.get("diag") or {}
+        adf = b.get("analytical")
+        regime = b.get("monetary_regime", "floating")
+        insts = d.get("instruments") or {
+            l: {"symbol": e.get("meta", {}).get("source_id"), "status": e.get("status"),
+                "reason": e.get("reason"),
+                "rows": (0 if e.get("series") is None else int(len(e["series"])))}
+            for l, e in b.get("instruments", {}).items()}
+        rows.append({
+            "entity": b["label"],
+            "regime": f"{REGIME_ICON.get(regime, '🟢')} {REGIME_SHORT.get(regime, 'Own currency')}",
+            "sentiment_rows": d.get("sentiment_rows",
+                                    int(len(adf)) if adf is not None and not adf.empty else 0),
+            "distinct_days": d.get("distinct_days",
+                                   int(pd.to_datetime(adf["date"]).nunique())
+                                   if adf is not None and not adf.empty else 0),
+            "last_refresh": d.get("refreshed_at") or "—",
+            "instruments": "; ".join(
+                f"{l}[{v.get('symbol')}]:{v.get('status')}"
+                + (f"/{v['reason']}" if v.get("reason") else "")
+                for l, v in insts.items()) or "none",
+        })
+    return rows
+
+
+def render_diagnostics(entities: dict, rmode: str):
+    """Behind-the-scenes recorder — shape depends on where the data actually came
+    from (§Bug 2): live modes show the real GDELT HTTP trace; snapshot/demo modes
+    (nothing fetched live) show snapshot-relevant info instead of a wall of dashes.
+    The JSON download is always the complete per-entity `diag` artifact.
+    """
+    import json
+
+    is_live = rmode in ("live", "live (cached)")
+    rows = _diagnostics_rows_live(entities) if is_live else _diagnostics_rows_snapshot(entities)
+    full = {cid: (b.get("diag") or {"note": "no diag recorded"}) for cid, b in entities.items()}
+
+    label = "full GDELT trace + instrument outcomes" if is_live else "snapshot coverage + instrument outcomes"
+    with st.expander(f"🔧 Run diagnostics ({label})"):
+        if is_live:
+            st.caption("Live builds also log `BUILD DIAG …` to Streamlit Cloud → Manage app → logs. "
+                       "`artlist_http`/`tone_http` show the actual GDELT HTTP status (429 = rate-limited, "
+                       "200 with 0 articles = query returned nothing).")
+        else:
+            st.caption("No live GDELT fetch runs in this mode — this reflects what's actually stored "
+                       "(snapshot/demo), not a fetch trace. `instruments` shows each series' resolved "
+                       "status (ok / unavailable + reason).")
         st.dataframe(rows, use_container_width=True, hide_index=True)
         st.download_button("Download full diagnostics JSON",
                            data=json.dumps(full, indent=2, default=str),
@@ -584,7 +696,7 @@ def main():
     else:
         st.info("LIVE data mode.  ·  Correlation ≠ causation; the ±1.96/√n band is approximate.")
 
-    render_diagnostics(entities)
+    render_diagnostics(entities, rmode)
 
     view = st.segmented_control("View", VIEWS, default=VIEWS[0], label_visibility="collapsed") or VIEWS[0]
     st.divider()

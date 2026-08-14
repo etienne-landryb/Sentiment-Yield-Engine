@@ -166,15 +166,26 @@ def coverage(start, end, econ_only: bool = False) -> pd.DataFrame:
 
 
 def fetch_themes(codes, start, end, top: int = 60) -> pd.DataFrame:
-    """Per-country theme frequencies for the word cloud → [country_code, theme, count]."""
+    """Per-country theme frequencies for the word cloud → [country_code, theme, count].
+
+    Each `;`-separated V2Themes entry is itself `THEME_NAME,charoffset` — the same
+    style of compound field as V2Locations/V2Tone. Splitting only on `;` (without
+    also splitting each entry on `,` to drop the offset) leaves the offset glued to
+    the theme name, so e.g. `TAX_WORLDLANGUAGES_AZERBAIJAN,10` and `...,16` are
+    grouped as distinct "themes" instead of being the same theme with two
+    occurrences — both a downstream cosmetic bug (offsets rendering as literal
+    word-cloud text) and a real aggregation bug (one theme's count fragmented
+    across many spurious rows). SAFE_OFFSET(0) after the second split drops the
+    offset before grouping, exactly like V2Tone's compound field is already parsed.
+    """
     sql = f"""
         WITH t AS (
           SELECT
             SPLIT(loc, '#')[SAFE_OFFSET({_CC_OFFSET})] AS country_code,
-            theme
+            SPLIT(theme_raw, ',')[SAFE_OFFSET(0)] AS theme
           FROM `{TABLE}`,
                UNNEST(SPLIT(V2Locations, ';')) AS loc,
-               UNNEST(SPLIT(V2Themes, ';')) AS theme
+               UNNEST(SPLIT(V2Themes, ';')) AS theme_raw
           WHERE _PARTITIONDATE BETWEEN @start AND @end
             AND V2Locations IS NOT NULL AND V2Themes IS NOT NULL
         )
