@@ -485,6 +485,7 @@ def build_country_from_snapshot(country_cfg: dict, snap: dict, period) -> dict:
             refreshed = str(r.iloc[0]["refreshed_at"])
 
     tdf = snap.get("themes", pd.DataFrame())
+    trows = pd.DataFrame(columns=["country_id", "date", "theme", "count"])
     if tdf is not None and not tdf.empty and "country_id" in tdf.columns:
         trows = tdf[tdf["country_id"] == cid]
         if "date" in trows.columns:
@@ -496,10 +497,25 @@ def build_country_from_snapshot(country_cfg: dict, snap: dict, period) -> dict:
             trows = trows[(trows["date"] >= start) & (trows["date"] <= end)]
         # else: pre-date-aware flat [country_id, theme, count] shape — no period
         # dimension to slice, fall back to the whole-snapshot total (old behavior).
-        themes = (trows.groupby("theme", as_index=False)["count"].sum()
-                  .sort_values("count", ascending=False).reset_index(drop=True))
-    else:
-        themes = pd.DataFrame(columns=["theme", "count"])
+    themes = (trows.groupby("theme", as_index=False)["count"].sum()
+              .sort_values("count", ascending=False).reset_index(drop=True)
+              if not trows.empty else pd.DataFrame(columns=["theme", "count"]))
+
+    # "Topic mention counts" / "Per-topic sentiment" reuse this same date-aware
+    # GDELT theme data — no per-article data needed, unlike demo mode's own
+    # topic-tagged articles. "Sentiment" per theme is necessarily a co-occurrence
+    # proxy here (the country's own daily tone on the days each theme appeared,
+    # count-weighted), not per-article sentiment — snapshot mode has no
+    # article-level data to compute the latter honestly.
+    if not analytical.empty and "date" in trows.columns and not trows.empty:
+        day_sent = analytical.set_index("date")["sentiment_mean"].to_dict()
+        tc_by_date: dict = {}
+        for d, g in trows.groupby("date"):
+            labels = g["theme"].astype(str).str.replace("_", " ").str.title()
+            tc_by_date[d] = dict(zip(labels, g["count"]))
+        analytical["topic_counts"] = analytical["date"].map(lambda d: tc_by_date.get(d, {}))
+        analytical["topic_sentiment"] = analytical["date"].map(
+            lambda d: dict.fromkeys(tc_by_date.get(d, {}), day_sent.get(d, 0.0)))
 
     return {
         "country_id": cid,

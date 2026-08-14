@@ -435,8 +435,13 @@ def render_country_detail(entities: dict):
         st.plotly_chart(viz_diag.fig_quality_gauge(adf["data_quality_score"].iloc[0] if not adf.empty else 0),
                         use_container_width=True, key=f"d_gauge_{dcid}")
     with q2:
-        st.plotly_chart(viz_diag.fig_source_concentration(b["articles"]),
-                        use_container_width=True, key=f"d_src_{dcid}")
+        arts_for_src = b["articles"]
+        if arts_for_src is not None and not arts_for_src.empty:
+            st.plotly_chart(viz_diag.fig_source_concentration(arts_for_src),
+                            use_container_width=True, key=f"d_src_{dcid}")
+        else:
+            st.caption("Source structure")
+            st.info("Needs per-article domain data, not stored in snapshot mode.")
 
     st.markdown("#### Headline drill-down")
     arts = b["articles"]
