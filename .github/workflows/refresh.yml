@@ -1,0 +1,52 @@
+name: Refresh snapshot
+
+# Daily, off-peak. Fetches only new days since the stored last_date per country and
+# commits the updated data/snapshot/*.parquet. FRED + GDELT are keyless; only Twelve
+# Data needs a secret. Manual runs allowed via workflow_dispatch.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-snapshot
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write GCP service-account key
+        run: |
+          echo '${{ secrets.GCP_SA_KEY }}' > "${RUNNER_TEMP}/gcp_sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp_sa.json" >> "$GITHUB_ENV"
+
+      - name: Refresh snapshot
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+        run: python scripts/refresh.py
+
+      - name: Commit updated snapshot
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain data/snapshot)" ]; then
+            git add data/snapshot
+            git commit -m "chore: daily snapshot refresh $(date -u +%Y-%m-%d)"
+            git push
+          else
+            echo "No snapshot changes."
+          fi

@@ -1,0 +1,109 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Keyword / topic dictionaries (V1). Deterministic and interpretable.
+# A headline is tagged with the topic that has the most keyword hits; ties break
+# by config order; "Other" if no keyword matches. Adding a topic is a config edit.
+# Keywords are matched case-insensitively as whole words/phrases.
+# ─────────────────────────────────────────────────────────────────────────────
+topics:
+  Inflation:
+    - inflation
+    - cpi
+    - consumer prices
+    - cost of living
+    - price rises
+    - deflation
+    - disinflation
+
+  Monetary Policy:
+    - interest rate
+    - rate hike
+    - rate cut
+    - central bank
+    - federal reserve
+    - the fed
+    - ecb
+    - bank of england
+    - bank of japan
+    - monetary policy
+    - quantitative easing
+    - tightening
+
+  Employment:
+    - unemployment
+    - jobs
+    - payrolls
+    - labor market
+    - labour market
+    - hiring
+    - layoffs
+    - jobless
+    - wages
+
+  Growth:
+    - gdp
+    - growth
+    - recession
+    - economic outlook
+    - slowdown
+    - expansion
+    - output
+    - contraction
+
+  Energy:
+    - oil
+    - gas
+    - energy
+    - opec
+    - crude
+    - electricity
+    - power prices
+    - petroleum
+    - lng
+
+  Trade:
+    - trade
+    - exports
+    - imports
+    - tariff
+    - trade deficit
+    - supply chain
+    - trade war
+    - sanctions
+
+  Markets:
+    - stocks
+    - equities
+    - bond
+    - yield
+    - shares
+    - index
+    - selloff
+    - rally
+    - bear market
+    - bull market
+
+  Housing:
+    - housing
+    - mortgage
+    - home prices
+    - real estate
+    - property
+    - rents
+
+  Currency:
+    - dollar
+    - euro
+    - yen
+    - pound
+    - exchange rate
+    - forex
+    - currency
+
+  Technology:
+    - tech
+    - ai
+    - artificial intelligence
+    - chips
+    - semiconductor
+    - software
+    - startup

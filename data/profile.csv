@@ -1,0 +1,31 @@
+code,id,label,region,distinct_days,avg_articles_per_day,sentiment_ok,fx_ok,idx_ok,financial_ok,in_panel
+US,united_states,United States,north_america,184,372708.2,True,True,True,True,True
+CA,canada,Canada,north_america,184,50674.9,True,True,True,True,True
+MX,mexico,Mexico,latin_america,184,41693.0,True,True,True,True,True
+BR,brazil,Brazil,latin_america,184,32395.3,True,True,True,True,True
+UK,united_kingdom,United Kingdom,europe,184,95630.0,True,True,True,True,True
+FR,france,France,europe,184,49302.3,True,True,True,True,True
+GM,germany,Germany,europe,184,62907.7,True,True,True,True,True
+IT,italy,Italy,europe,184,68971.5,True,True,True,True,True
+SP,spain,Spain,europe,184,57101.3,True,True,True,True,True
+NL,netherlands,Netherlands,europe,184,9371.0,True,True,True,True,True
+BE,belgium,Belgium,europe,184,9052.3,True,True,True,True,True
+PO,portugal,Portugal,europe,184,10478.8,True,True,False,True,True
+FI,finland,Finland,europe,184,7400.4,True,True,True,True,True
+GR,greece,Greece,europe,184,29080.1,True,True,True,True,True
+SW,sweden,Sweden,europe,184,16386.2,True,True,True,True,True
+SZ,switzerland,Switzerland,europe,184,12810.9,True,True,True,True,True
+False,norway,Norway,europe,0,0.0,False,True,True,True,False
+DA,denmark,Denmark,europe,184,5993.0,True,True,True,True,True
+PL,poland,Poland,europe,184,17033.3,True,False,True,True,True
+JA,japan,Japan,asia_pacific,184,36139.6,True,True,True,True,True
+CH,china,China,asia_pacific,184,197973.6,True,True,True,True,True
+IN,india,India,asia_pacific,184,83244.5,True,True,True,True,True
+AS,australia,Australia,asia_pacific,184,45717.4,True,True,True,True,True
+NZ,new_zealand,New Zealand,asia_pacific,184,6677.8,True,True,True,True,True
+KS,south_korea,South Korea,asia_pacific,184,20819.7,True,True,True,True,True
+TW,taiwan,Taiwan,asia_pacific,184,29483.9,True,True,True,True,True
+SN,singapore,Singapore,asia_pacific,184,4196.9,True,True,True,True,True
+HK,hong_kong,Hong Kong,asia_pacific,184,7933.0,True,True,True,True,True
+TH,thailand,Thailand,asia_pacific,184,9292.8,True,True,True,True,True
+SF,south_africa,South Africa,africa_mideast,184,7624.7,True,True,True,True,True

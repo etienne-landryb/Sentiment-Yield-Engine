@@ -1,0 +1,30 @@
+# Secrets
+.env
+.streamlit/secrets.toml
+gca.json
+*service-account*.json
+*sa-key*.json
+credentials*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Cached / generated data
+data/raw/*
+data/processed/*
+data/cache/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/cache/.gitkeep
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,14 @@
+# The app renders everything through explicit st.* calls; disable "magic" so a
+# trailing module-level expression (e.g. main()) is never auto-written as st.help.
+[runner]
+magicEnabled = false
+
+# Show the full menu so viewers get Settings → Appearance (light/dark/system).
+[client]
+toolbarMode = "auto"
+
+# Brand accent + font only. No background/text colors, so the theme follows the
+# viewer's system setting and the light/dark toggle stays available.
+[theme]
+primaryColor = "#4C78A8"
+font = "sans serif"

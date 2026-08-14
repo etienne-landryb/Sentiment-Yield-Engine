@@ -1,0 +1,136 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Single source of truth for countries, regions, instruments, and aggregates.
+# Adding a country / instrument / region / aggregate here is the ONLY change
+# required — no code edits. Nothing below is hard-coded anywhere in src/.
+#
+# Market model (post-yfinance): currency-vs-USD (FX) is the broad, reliable spine;
+# the national equity index is a country-specific overlay. Per-instrument SOURCE is
+# fixed here and never swapped at runtime.
+#   • FX / US index / US yield → FRED (keyless, ~weekly H.10 cadence for FX)
+#   • national index           → Twelve Data (free key, daily; ≤8/min, 800/day)
+#   • where Twelve Data lacks a native index → pin a US-listed ETF proxy here.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Applied to every country's GDELT pull.
+base_query: '(economy OR inflation OR "interest rate" OR "central bank" OR market OR recession OR GDP OR unemployment)'
+
+# Data-source cadences (drives the two-speed cache + freshness labels).
+sources:
+  fred:       { cadence: weekly }
+  twelvedata: { cadence: daily }
+  gdelt:      { cadence: daily }
+
+# Region metadata (labels + map grouping). Add regions here; add countries below.
+regions:
+  north_america:  { label: North America }
+  europe:         { label: Europe }
+  asia_pacific:   { label: Asia-Pacific }
+
+countries:
+  - id: united_states
+    label: United States
+    region: north_america
+    currency: USD
+    iso3: USA
+    gdp: 27.4
+    monetary_regime: floating
+    label_note: "Own currency (USD is the numeraire)"
+    gdelt: { source_country: US, source_lang: english }
+    instruments:
+      - { type: index, label: S&P 500, source: fred, source_id: SP500, series_type: price }
+      - { type: yield, label: US 10Y,  source: fred, source_id: DGS10, series_type: yield }
+
+  - id: france
+    label: France
+    region: europe
+    currency: EUR
+    iso3: FRA
+    gdp: 3.03
+    monetary_regime: floating
+    label_note: "Own currency"
+    gdelt: { source_country: FR, source_lang: english }
+    instruments:
+      - { type: fx,    label: EUR/USD, source: fred,       source_id: DEXUSEU, series_type: price }
+      # Yahoo-format index symbols (^FCHI) don't resolve on Twelve Data's free tier;
+      # pin the US-listed ETF proxy (US-session, USD) — resolves reliably as an equity.
+      - { type: index, label: "CAC 40 (EWQ · USD proxy)", source: twelvedata, source_id: "EWQ", series_type: price }
+
+  - id: germany
+    label: Germany
+    region: europe
+    currency: EUR
+    iso3: DEU
+    gdp: 4.46
+    monetary_regime: floating
+    label_note: "Own currency"
+    gdelt: { source_country: GM, source_lang: english }
+    instruments:
+      - { type: fx,    label: EUR/USD, source: fred,       source_id: DEXUSEU, series_type: price }
+      - { type: index, label: "DAX",   source: twelvedata, source_id: "DAX",   series_type: price }
+
+  - id: japan
+    label: Japan
+    region: asia_pacific
+    currency: JPY
+    iso3: JPN
+    gdp: 4.21
+    monetary_regime: floating
+    label_note: "Own currency"
+    gdelt: { source_country: JA, source_lang: english }
+    instruments:
+      - { type: fx,    label: USD/JPY,    source: fred,       source_id: DEXJPUS, series_type: price }
+      - { type: index, label: "Nikkei 225 (EWJ · USD proxy)", source: twelvedata, source_id: "EWJ", series_type: price }
+
+  - id: united_kingdom
+    label: United Kingdom
+    region: europe
+    currency: GBP
+    iso3: GBR
+    gdp: 3.34
+    monetary_regime: floating
+    label_note: "Own currency"
+    gdelt: { source_country: UK, source_lang: english }
+    instruments:
+      - { type: fx,    label: GBP/USD,   source: fred,       source_id: DEXUSUK, series_type: price }
+      # Twelve Data free tier lacks a native FTSE index → pinned US-listed ETF proxy
+      # (US-session, USD-denominated). A fixed per-instrument choice, not a runtime swap.
+      - { type: index, label: "iShares UK (EWU · USD proxy)", source: twelvedata, source_id: "EWU", series_type: price }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared-currency aggregates. 21 euro-area countries share one EUR/USD, so the
+# clean macro pairing is a GDP-weighted blend of member sentiment vs EUR — not 21
+# independent currency signals. Members illustrative; expand via config. Blend
+# degrades gracefully over whichever members are actually defined above.
+# ─────────────────────────────────────────────────────────────────────────────
+aggregates:
+  - id: euro_area
+    label: Euro area
+    region: europe
+    currency: EUR
+    iso3: null
+    sentiment: { blend: gdp_weighted, members: [france, germany] }
+    instruments:
+      - { type: fx, label: EUR/USD, source: fred, source_id: DEXUSEU, series_type: price }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Analysis parameters (methodology constants, per README § Methodology). UNCHANGED.
+# ─────────────────────────────────────────────────────────────────────────────
+analysis:
+  polarity_threshold: 0.05      # VADER compound ±0.05 → positive / neutral / negative
+  event:
+    z_thresh: 2.0
+    window: 30                  # rolling window (days) for sentiment mean/std
+  correlation:
+    max_lag: 5                  # lead/lag scan range (± days)
+    rolling_window: 30          # rolling-correlation window (days)
+  volatility_window: 20         # realized-vol window (days)
+
+  # Data-quality composite (0–100). Weights + target per README table.
+  quality:
+    target: 40                  # target article_count for the Volume sub-score
+    weights:
+      volume: 0.25              # min(article_count / target, 1)
+      diversity: 0.20           # 1 - HHI
+      duplicate: 0.15           # 1 - duplicate_rate
+      coverage: 0.20            # days_with_data / days_in_window
+      scoring: 0.20             # scored_headlines / total_headlines

@@ -1,0 +1,44 @@
+# Core
+pandas>=2.0
+numpy>=1.24
+scipy>=1.10
+scikit-learn>=1.3
+PyYAML>=6.0
+python-dotenv>=1.0
+
+# News ingestion
+requests>=2.31
+feedparser>=6.0
+
+# Sentiment
+vaderSentiment>=3.3.2
+
+# Financial data — FRED (FX + US index/yield) and Twelve Data (national indices, via requests)
+pandas-datareader>=0.10
+
+# Snapshot store (parquet)
+pyarrow>=14.0
+
+# Sentiment via GDELT BigQuery (gkg_partitioned). Keyless data, but needs a GCP
+# service account (GOOGLE_APPLICATION_CREDENTIALS). Only used by scripts/, never the app.
+google-cloud-bigquery>=3.20
+db-dtypes>=1.2
+# yfinance is retained ONLY for the legacy fetch path exercised by the frozen
+# methodology test (tests/test_methodology.py); the live pipeline does not use it.
+yfinance>=0.2.40
+
+# Visualization
+streamlit>=1.45.1
+plotly>=5.18
+wordcloud>=1.9
+matplotlib>=3.7
+
+# Optional LLM (graceful without a key)
+groq>=0.11
+
+# Tests
+pytest>=7.4
+
+# Optional persistence (Phase 7) — uncomment to enable
+# supabase>=2.0
+# psycopg2-binary>=2.9
