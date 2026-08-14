@@ -31,7 +31,7 @@ pycountry>=24.0
 yfinance>=0.2.40
 
 # Visualization
-streamlit>=1.45.1
+streamlit>=1.61.1
 plotly>=5.18
 wordcloud>=1.9
 matplotlib>=3.7
