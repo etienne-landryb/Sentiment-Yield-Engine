@@ -25,5 +25,18 @@ ACCENT = "#4C78A8"
 def apply(fig: go.Figure, height: int = 340, *, legend_top: bool = True,
           hover: str | None = "x unified", title: str | None = None,
           **_ignored) -> go.Figure:
-    """Style a figure through the shared template. `title` is ignored (Tier 1.1)."""
-    return style(fig, height=height, legend_top=legend_top, hover=hover)
+    """Style a figure through the shared template.
+
+    `title` is normally ignored (Tier 1.1 — chart identity comes from the
+    Streamlit heading above it). Exception: a figure with no traces has no
+    other way to explain itself, so an empty figure's `title` is rendered as
+    a centered in-figure annotation instead of being silently dropped —
+    the difference between an honest "No topics" and a blank chart.
+    """
+    styled = style(fig, height=height, legend_top=legend_top, hover=hover)
+    if title and not styled.data:
+        styled.add_annotation(
+            xref="paper", yref="paper", x=0.5, y=0.5, xanchor="center", yanchor="middle",
+            showarrow=False, text=title, font=dict(size=13, color="rgba(128,128,128,0.75)"),
+        )
+    return styled
