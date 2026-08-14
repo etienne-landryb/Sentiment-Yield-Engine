@@ -55,6 +55,11 @@ HONESTY_NOTES = [
 
 _CSS = """
 <style>
+  /* Brand accent (#4C78A8) + font live here, not in .streamlit/config.toml's
+     [theme] — any [theme] section disables Streamlit's System/Light/Dark
+     picker outright, confirmed by diffing against sibling apps. */
+  :root { --brand-accent: #4C78A8; }
+  html, body, .stApp { font-family: "Source Sans Pro", ui-sans-serif, system-ui, -apple-system, sans-serif; }
   .block-container { padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1500px; }
   h1, h2, h3 { letter-spacing: -0.01em; }
   h1 { font-weight: 700; }
@@ -66,6 +71,12 @@ _CSS = """
   }
   div[data-testid="stMetricValue"] { font-size: 1.4rem; }
   div[data-testid="stAlert"] { border-radius: 12px; }
+  a, a:visited { color: var(--brand-accent); }
+  input[type="checkbox"]:checked, input[type="radio"]:checked { accent-color: var(--brand-accent); }
+  .stProgress > div > div > div > div { background-color: var(--brand-accent); }
+  button[kind="primary"] { background-color: var(--brand-accent); border-color: var(--brand-accent); }
+  [data-baseweb="tag"] { background-color: var(--brand-accent) !important; }
+  div[data-baseweb="slider"] div[role="slider"] { background-color: var(--brand-accent) !important; border-color: var(--brand-accent) !important; }
   .sidebar-footer {
     margin-top: 1rem;
     padding-top: 0.75rem;

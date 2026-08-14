@@ -3,15 +3,11 @@
 [runner]
 magicEnabled = false
 
-# "auto" only shows the toolbar on hover (fades out after initial paint) — that's
-# what made the ⋮ menu appear briefly then vanish. "viewer" keeps the viewer-facing
-# menu (About/Settings/Print/Report a bug) always visible, so Settings → Appearance
-# stays reachable.
+# Nothing here pins a palette — any [theme] section, even one that only sets
+# primaryColor/font, disables the System/Light/Dark picker entirely (confirmed
+# by diffing against sibling apps: the two with no config.toml and the one
+# with a [theme]-free config.toml all keep the picker; this app's [theme]
+# block was what removed it). Brand accent + font are applied via CSS in
+# app/streamlit_app.py's _CSS block instead.
 [client]
-toolbarMode = "viewer"
-
-# Brand accent + font only. No background/text colors, so the theme follows the
-# viewer's system setting and the light/dark toggle stays available.
-[theme]
-primaryColor = "#4C78A8"
-font = "sans serif"
+toolbarMode = "auto"
