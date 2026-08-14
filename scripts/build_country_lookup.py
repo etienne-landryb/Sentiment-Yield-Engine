@@ -30,14 +30,39 @@ Sourcing:
     currency BASKET, not purely USD — doesn't fit a clean single peg_to) and
     Zimbabwe (monetary status has changed repeatedly and recently; not confidently
     verifiable as stable at time of writing). Both fall through to `floating`.
+  - Extended this round (same standard: real, citable, decades-stable only):
+    ECCU/XCD -> USD @ 2.70 (6 UN members: Antigua and Barbuda, Dominica, Grenada,
+    St Kitts and Nevis, St Lucia, St Vincent and the Grenadines); Bosnia (BAM) ->
+    EUR @ 1.95583 currency board since 1997; Comoros (KMF) -> EUR @ 491.96775
+    since 1999; Bhutan (BTN) -> INR 1:1 since 1974; Nepal (NPR) -> INR 1.6:1 since
+    1993; Lesotho/Namibia/Eswatini -> ZAR 1:1 via the Common Monetary Area. Anchor
+    proxies (DEXINUS, DEXSFUS) used exactly as the CFA-zone DEXUSEU pattern.
+  - Bulgaria adopted the euro on 2026-01-01 (real, dated event) — reclassified
+    from floating-with-own-BGN to floating-with-EUR, folded into the euro area.
+
+UN membership: derived from pycountry's full 249-entry ISO-3166-1 list minus a
+documented 56-code exclusion set (dependent territories, SARs, Taiwan, Vatican
+City, the State of Palestine as UN observers, and uninhabited entities) — the
+count lands exactly on the UN's own official 193, which is the correctness check.
+Written to data/un_member_states.csv. The core country_lookup is restricted to
+these 193 PLUS three previously-justified non-UN exceptions retained for
+substantial GDELT coverage and genuinely distinct currencies/markets: Hong Kong,
+Macau, Taiwan. Kosovo is also kept (a real government, not a full UN member due
+to contested recognition). Vatican City — included in an earlier round — is
+DROPPED this round. Checked its actual coverage first: full 184/184-day, ~223
+articles/day (data/coverage_sentiment.csv, code VT) — dense, not thin. Dropped
+anyway: that volume is very likely global papal/diplomatic mentions (encyclicals,
+Vatican statements on world affairs) via GDELT's co-mention attribution, not
+Vatican-City-specific economic signal, so it doesn't cleanly fit the panel's
+economic-sentiment thesis even though the raw day/article counts pass. Also has
+no realistic market/currency mechanism beyond what Kosovo already represents
+(both unilaterally euroized) — a second, independent reason to exclude it.
 
 Excluded entirely: defunct/duplicate FIPS codes (RB = legacy pre-2008 Serbia dup
 of RI; YI = defunct Serbia-and-Montenegro/Yugoslavia code retired 2006; OC =
 unidentified, no confident source found), disputed/uninhabited islet catch-alls,
 and non-UN-member dependent territories that would just duplicate a parent
-state's currency — EXCEPT Hong Kong, Macau, Taiwan, and Kosovo, kept as
-documented exceptions (substantial GDELT coverage, genuinely distinct
-currencies/markets, real economic significance).
+state's currency.
 """
 from __future__ import annotations
 
@@ -53,6 +78,28 @@ if str(ROOT) not in sys.path:
 
 COVERAGE_CSV = ROOT / "data" / "coverage_sentiment.csv"
 OUT_PATH = ROOT / "config" / "country_lookup.yaml"
+UN_MEMBERS_PATH = ROOT / "data" / "un_member_states.csv"
+UN_CANDIDATES_PATH = ROOT / "data" / "un_candidates.csv"
+
+# Non-UN-member ISO2 codes: dependent territories, Special Administrative Regions,
+# Taiwan, UN-observer entities (Vatican City, State of Palestine), and uninhabited/
+# administrative entities that still carry an ISO 3166-1 code. Subtracting this
+# documented 56-entry set from pycountry's full 249-entry list lands EXACTLY on the
+# UN's own official count of 193 — that arithmetic match is the correctness check.
+NON_UN_ISO2 = {
+    "AI", "AQ", "AS", "AW", "AX", "BL", "BM", "BQ", "BV", "CC", "CK", "CW", "CX",
+    "EH", "FK", "FO", "GF", "GG", "GI", "GL", "GP", "GS", "GU", "HK", "HM", "IM",
+    "IO", "JE", "KY", "MF", "MO", "MP", "MQ", "MS", "NC", "NF", "NU", "PF", "PM",
+    "PN", "PR", "PS", "RE", "SH", "SJ", "SX", "TC", "TF", "TK", "TW", "UM", "VA",
+    "VG", "VI", "WF", "YT",
+}
+# Non-UN entities kept anyway (substantial GDELT coverage, genuinely distinct
+# currencies/markets) — Vatican City (VT) dropped this round despite dense real
+# coverage (184/184 days, ~223 articles/day): almost certainly global papal/
+# diplomatic mentions via co-mention attribution, not Vatican-specific economic
+# signal — fails the panel's economic-sentiment thesis even though it clears the
+# density threshold. See docstring for the full reasoning.
+KEPT_NON_UN_EXCEPTIONS = {"HK", "MC", "TW", "KV"}  # FIPS codes (Hong Kong, Macau, Taiwan, Kosovo)
 
 # ── code -> (name, iso2) : GDELT's own lookup + 2 verified corrections ──────────
 # fmt: off
@@ -200,6 +247,34 @@ HARD_USD_PEG = {  # code -> (peg_rate str, fred_fx or None)
     "BA": ("0.376", None), "MU": ("0.3845", None), "JO": ("0.709", None),
     "HK": ("~7.75-7.85 (linked exchange rate band)", "DEXHKUS"),
 }
+# Additional sourced pegs (verified this round, same standard as the sets above — real,
+# citable, decades-stable arrangements only). code -> (currency, peg_to, peg_rate, fred_fx
+# of the ANCHOR currency, used exactly as the CFA-zone pattern already does).
+#   - ECCU/XCD -> USD @ 2.70 since 1976 (6 UN-member Eastern Caribbean states; Anguilla
+#     and Montserrat also use XCD but are non-UN British territories, already excluded).
+#   - Bosnia (BAM) -> EUR @ 1.95583, currency board since 1997.
+#   - Comoros (KMF) -> EUR @ 491.96775, French monetary-cooperation peg since 1999
+#     (administered separately from the BEAC/BCEAO CFA zone, same fixed-EUR-peg family).
+#   - Bhutan (BTN) -> INR @ 1:1 since 1974; Nepal (NPR) -> INR @ 1.6:1 since 1993 (both
+#     use India's own FRED series, DEXINUS, as the anchor proxy — same mechanical logic
+#     as CFA members using DEXUSEU).
+#   - Lesotho (LSL), Namibia (NAD), Eswatini (SZL) -> ZAR @ 1:1 via the Common Monetary
+#     Area (CMA); anchor proxy is South Africa's own FRED series, DEXSFUS.
+_ECCU_XCD = {"AC", "DO", "GJ", "SC", "ST", "VC"}  # Antigua&Barbuda, Dominica, Grenada,
+                                                   # St Kitts&Nevis, St Lucia, St Vincent
+OTHER_PEG = {
+    **{c: ("XCD", "USD", "2.70", None) for c in _ECCU_XCD},
+    "BK": ("BAM", "EUR", "1.95583", "DEXUSEU"),
+    "CN": ("KMF", "EUR", "491.96775", "DEXUSEU"),
+    "BT": ("BTN", "INR", "1:1", "DEXINUS"),
+    "NP": ("NPR", "INR", "1.6:1", "DEXINUS"),
+    "LT": ("LSL", "ZAR", "1:1", "DEXSFUS"),
+    "WA": ("NAD", "ZAR", "1:1", "DEXSFUS"),
+    "WZ": ("SZL", "ZAR", "1:1", "DEXSFUS"),
+}
+# Bulgaria adopted the euro on 2026-01-01, replacing the lev (BGN) it was floating-with-
+# own-currency under previously — a real, dated event, not a guess. Currency override.
+CURRENCY_OVERRIDE = {"BU": "EUR", "KV": "EUR"}  # KV=Kosovo, unilaterally euroized (as before)
 
 # ── FRED DEX candidates: currency -> series id (H.10 release; test-fetch confirms) ──
 FRED_DEX = {
@@ -263,6 +338,11 @@ def classify(code: str, currency: str) -> dict:
         return {"regime": "pegged", "currency": currency, "peg_to": "USD", "peg_rate": rate,
                 "fred_fx": fred_fx, "td_index": TD_INDEX.get(_iso2_of(code)),
                 "label_note": "Pegged to USD (fixed rate)"}
+    if code in OTHER_PEG:
+        ccy, peg_to, rate, fred_fx = OTHER_PEG[code]
+        return {"regime": "pegged", "currency": ccy, "peg_to": peg_to, "peg_rate": rate,
+                "fred_fx": fred_fx, "td_index": TD_INDEX.get(_iso2_of(code)),
+                "label_note": f"Pegged to {peg_to} (fixed rate)"}
     fred_fx = FRED_DEX.get(currency)
     td_index = TD_INDEX.get(_iso2_of(code))
     if fred_fx or td_index:
@@ -277,10 +357,61 @@ def _iso2_of(code: str) -> str | None:
     return CODE_NAME_ISO2.get(code, (None, None))[1]
 
 
+def _write_un_member_states() -> set:
+    """pycountry's full ISO list minus NON_UN_ISO2 -> data/un_member_states.csv.
+
+    Returns the resulting UN-member iso2 set. The row count is the correctness
+    check: it must land exactly on 193.
+    """
+    import pycountry
+
+    all_countries = list(pycountry.countries)
+    un_iso2 = {c.alpha_2 for c in all_countries} - NON_UN_ISO2
+    rows = sorted(
+        (c.name, c.alpha_2, c.alpha_3) for c in all_countries if c.alpha_2 in un_iso2
+    )
+    assert len(rows) == 193, f"UN-member derivation landed on {len(rows)}, expected 193"
+    with open(UN_MEMBERS_PATH, "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["un_name", "iso2", "iso3"])
+        w.writerows(rows)
+    return un_iso2
+
+
+def _write_un_candidates(candidates: list, cov_by_code: dict) -> None:
+    """§1 checkpoint artifact: coverage_sentiment.csv cross-walked to UN members."""
+    import pycountry
+
+    rows = []
+    for code in candidates:
+        name, iso2 = CODE_NAME_ISO2[code]
+        iso3 = pycountry.countries.get(alpha_2=iso2).alpha_3 if iso2 else ""
+        cov = cov_by_code.get(code, {})
+        rows.append((name, iso2 or "", iso3, code,
+                     cov.get("distinct_days", ""), cov.get("avg_articles_per_day", "")))
+    with open(UN_CANDIDATES_PATH, "w", newline="", encoding="utf-8") as fh:
+        w = csv.writer(fh)
+        w.writerow(["un_name", "iso2", "iso3", "fips_gdelt_code", "distinct_days", "avg_articles_per_day"])
+        w.writerows(sorted(rows))
+
+
 def main() -> None:
-    cov_codes = {r["country_code"] for r in csv.DictReader(open(COVERAGE_CSV, encoding="utf-8"))}
-    candidates = sorted(c for c in CODE_NAME_ISO2 if c in cov_codes)
-    skipped = sorted(cov_codes - set(CODE_NAME_ISO2))
+    un_iso2 = _write_un_member_states()
+
+    cov_rows = list(csv.DictReader(open(COVERAGE_CSV, encoding="utf-8")))
+    cov_codes = {r["country_code"] for r in cov_rows}
+    cov_by_code = {r["country_code"]: r for r in cov_rows}
+
+    # §1: candidate universe = UN members reachable from real coverage, plus the
+    # documented non-UN exceptions. Vatican City (VT) is a UN observer and is NOT
+    # in KEPT_NON_UN_EXCEPTIONS, so it is dropped here even though it was a
+    # candidate in an earlier round (see docstring).
+    candidates = sorted(
+        c for c in CODE_NAME_ISO2 if c in cov_codes
+        and (CODE_NAME_ISO2[c][1] in un_iso2 or c in KEPT_NON_UN_EXCEPTIONS)
+    )
+    skipped = sorted(cov_codes - set(candidates))
+    _write_un_candidates(candidates, cov_by_code)
 
     countries = []
     for code in candidates:
@@ -293,9 +424,7 @@ def main() -> None:
                 "us_special": True, "label_note": "Own currency (USD is the numeraire)",
             })
             continue
-        currency = CURRENCY_OF_ISO2.get(iso2) if iso2 else None
-        if not currency:
-            currency = {"KV": "EUR"}.get(code)  # Kosovo: unilaterally euroized, real fact
+        currency = CURRENCY_OVERRIDE.get(code) or (CURRENCY_OF_ISO2.get(iso2) if iso2 else None)
         cls = classify(code, currency or "")
         cid = name.lower().replace(" ", "_").replace("(", "").replace(")", "").replace("'", "").replace("-", "_")
         countries.append({

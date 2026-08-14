@@ -1,31 +1,198 @@
-code,id,label,region,distinct_days,avg_articles_per_day,sentiment_ok,fx_ok,idx_ok,financial_ok,in_panel
-US,united_states,United States,north_america,184,372708.2,True,True,True,True,True
-CA,canada,Canada,north_america,184,50674.9,True,True,True,True,True
-MX,mexico,Mexico,latin_america,184,41693.0,True,True,True,True,True
-BR,brazil,Brazil,latin_america,184,32395.3,True,True,True,True,True
-UK,united_kingdom,United Kingdom,europe,184,95630.0,True,True,True,True,True
-FR,france,France,europe,184,49302.3,True,True,True,True,True
-GM,germany,Germany,europe,184,62907.7,True,True,True,True,True
-IT,italy,Italy,europe,184,68971.5,True,True,True,True,True
-SP,spain,Spain,europe,184,57101.3,True,True,True,True,True
-NL,netherlands,Netherlands,europe,184,9371.0,True,True,True,True,True
-BE,belgium,Belgium,europe,184,9052.3,True,True,True,True,True
-PO,portugal,Portugal,europe,184,10478.8,True,True,False,True,True
-FI,finland,Finland,europe,184,7400.4,True,True,True,True,True
-GR,greece,Greece,europe,184,29080.1,True,True,True,True,True
-SW,sweden,Sweden,europe,184,16386.2,True,True,True,True,True
-SZ,switzerland,Switzerland,europe,184,12810.9,True,True,True,True,True
-False,norway,Norway,europe,0,0.0,False,True,True,True,False
-DA,denmark,Denmark,europe,184,5993.0,True,True,True,True,True
-PL,poland,Poland,europe,184,17033.3,True,False,True,True,True
-JA,japan,Japan,asia_pacific,184,36139.6,True,True,True,True,True
-CH,china,China,asia_pacific,184,197973.6,True,True,True,True,True
-IN,india,India,asia_pacific,184,83244.5,True,True,True,True,True
-AS,australia,Australia,asia_pacific,184,45717.4,True,True,True,True,True
-NZ,new_zealand,New Zealand,asia_pacific,184,6677.8,True,True,True,True,True
-KS,south_korea,South Korea,asia_pacific,184,20819.7,True,True,True,True,True
-TW,taiwan,Taiwan,asia_pacific,184,29483.9,True,True,True,True,True
-SN,singapore,Singapore,asia_pacific,184,4196.9,True,True,True,True,True
-HK,hong_kong,Hong Kong,asia_pacific,184,7933.0,True,True,True,True,True
-TH,thailand,Thailand,asia_pacific,184,9292.8,True,True,True,True,True
-SF,south_africa,South Africa,africa_mideast,184,7624.7,True,True,True,True,True
+code,id,label,region,monetary_regime,distinct_days,avg_articles_per_day,sentiment_ok,fx_ok,idx_ok,financial_ok,in_panel
+AC,antigua_and_barbuda,Antigua and Barbuda,latin_america,pegged,184,74.8,True,False,False,False,True
+AE,united_arab_emirates,United Arab Emirates,africa_mideast,pegged,184,7856.2,True,False,False,False,True
+AF,afghanistan,Afghanistan,asia_pacific,unlinked,184,4737.4,True,False,False,False,True
+AG,algeria,Algeria,africa_mideast,unlinked,184,2831.1,True,False,False,False,True
+AJ,azerbaijan,Azerbaijan,europe,unlinked,184,4889.4,True,False,False,False,True
+AL,albania,Albania,europe,unlinked,184,5339.6,True,False,False,False,True
+AM,armenia,Armenia,europe,unlinked,184,5788.6,True,False,False,False,True
+AN,andorra,Andorra,europe,floating,184,326.3,True,True,False,True,True
+AO,angola,Angola,africa_mideast,unlinked,184,694.4,True,False,False,False,True
+AR,argentina,Argentina,latin_america,unlinked,184,21052.9,True,False,False,False,True
+AS,australia,Australia,asia_pacific,floating,184,45658.5,True,True,True,True,True
+AU,austria,Austria,europe,floating,184,10546.2,True,True,False,True,True
+BA,bahrain,Bahrain,africa_mideast,pegged,184,3309.1,True,False,False,False,True
+BB,barbados,Barbados,latin_america,unlinked,184,246.9,True,False,False,False,True
+BC,botswana,Botswana,africa_mideast,unlinked,184,244.3,True,False,False,False,True
+BE,belgium,Belgium,europe,floating,184,9016.3,True,True,True,True,True
+BF,bahamas,Bahamas,latin_america,unlinked,184,863.0,True,False,False,False,True
+BG,bangladesh,Bangladesh,asia_pacific,unlinked,184,6190.4,True,False,False,False,True
+BH,belize,Belize,latin_america,unlinked,184,375.8,True,False,False,False,True
+BK,bosnia_and_herzegovina,Bosnia and Herzegovina,europe,pegged,184,1395.5,True,True,False,True,True
+BL,bolivia,Bolivia,latin_america,unlinked,184,2172.9,True,False,False,False,True
+BM,myanmar,Myanmar,asia_pacific,unlinked,184,490.5,True,False,False,False,True
+BN,benin,Benin,africa_mideast,pegged,184,266.6,True,True,False,True,True
+BO,belarus,Belarus,europe,unlinked,184,4300.1,True,False,False,False,True
+BP,solomon_islands,Solomon Islands,asia_pacific,unlinked,184,219.4,True,False,False,False,True
+BR,brazil,Brazil,latin_america,floating,184,32307.8,True,True,True,True,True
+BT,bhutan,Bhutan,asia_pacific,pegged,184,171.6,True,True,False,True,True
+BU,bulgaria,Bulgaria,europe,floating,184,8037.8,True,True,False,True,True
+BX,brunei,Brunei,asia_pacific,unlinked,184,1075.6,True,False,False,False,True
+BY,burundi,Burundi,africa_mideast,unlinked,184,166.0,True,False,False,False,True
+CA,canada,Canada,north_america,floating,184,50333.3,True,True,True,True,True
+CB,cambodia,Cambodia,asia_pacific,unlinked,184,1340.8,True,False,False,False,True
+CD,chad,Chad,africa_mideast,pegged,184,449.9,True,True,False,True,True
+CE,sri_lanka,Sri Lanka,asia_pacific,floating,184,2892.9,True,True,False,True,True
+CF,congo_republic_of,Congo (Republic of),africa_mideast,pegged,184,2226.2,True,True,False,True,True
+CG,congo_democratic_republic_of,Congo (Democratic Republic of),africa_mideast,unlinked,184,915.1,True,False,False,False,True
+CH,china,China,asia_pacific,floating,184,197453.3,True,True,True,True,True
+CI,chile,Chile,latin_america,floating,184,6237.0,True,False,True,True,True
+CM,cameroon,Cameroon,africa_mideast,pegged,184,1115.9,True,True,False,True,True
+CN,comoros,Comoros,africa_mideast,pegged,184,46.3,True,True,False,True,True
+CO,colombia,Colombia,latin_america,floating,184,17399.5,True,False,True,True,True
+CS,costa_rica,Costa Rica,latin_america,unlinked,184,454.9,True,False,False,False,True
+CT,central_african_republic,Central African Republic,africa_mideast,pegged,184,106.2,True,True,False,True,True
+CU,cuba,Cuba,latin_america,unlinked,184,9679.0,True,False,False,False,True
+CV,cape_verde,Cape Verde,africa_mideast,unlinked,184,651.6,True,False,False,False,True
+CY,cyprus,Cyprus,europe,floating,184,5467.9,True,True,False,True,True
+DA,denmark,Denmark,europe,floating,184,5960.3,True,True,True,True,True
+DJ,djibouti,Djibouti,africa_mideast,unlinked,184,1268.1,True,False,False,False,True
+DO,dominica,Dominica,latin_america,pegged,184,211.3,True,False,False,False,True
+DR,dominican_republic,Dominican Republic,latin_america,unlinked,184,578.0,True,False,False,False,True
+EC,ecuador,Ecuador,latin_america,dollarized,184,3120.1,True,False,False,False,True
+EG,egypt,Egypt,africa_mideast,floating,184,18309.2,True,False,False,False,True
+EI,ireland,Ireland,europe,floating,184,13022.2,True,True,False,True,True
+EK,equatorial_guinea,Equatorial Guinea,africa_mideast,pegged,184,143.4,True,True,False,True,True
+EN,estonia,Estonia,europe,floating,184,1960.0,True,True,False,True,True
+ER,eritrea,Eritrea,africa_mideast,unlinked,184,165.4,True,False,False,False,True
+ES,el_salvador,El Salvador,latin_america,dollarized,184,631.6,True,False,False,False,True
+ET,ethiopia,Ethiopia,africa_mideast,unlinked,184,1079.8,True,False,False,False,True
+EZ,czech_republic,Czech Republic,europe,unlinked,184,7735.4,True,False,False,False,True
+FI,finland,Finland,europe,floating,184,7382.7,True,True,False,True,True
+FJ,fiji,Fiji,asia_pacific,unlinked,184,723.3,True,False,False,False,True
+FM,micronesia,Micronesia,asia_pacific,dollarized,183,63.4,True,False,False,False,True
+FR,france,France,europe,floating,184,49128.9,True,True,True,True,True
+GA,gambia,Gambia,africa_mideast,unlinked,184,343.6,True,False,False,False,True
+GB,gabon,Gabon,africa_mideast,pegged,184,288.1,True,True,False,True,True
+GG,georgia,Georgia,europe,unlinked,184,1443.8,True,False,False,False,True
+GH,ghana,Ghana,africa_mideast,unlinked,184,2843.4,True,False,False,False,True
+GJ,grenada,Grenada,latin_america,pegged,184,182.9,True,False,False,False,True
+GM,germany,Germany,europe,floating,184,62682.8,True,True,True,True,True
+GR,greece,Greece,europe,floating,184,28991.7,True,True,False,True,True
+GT,guatemala,Guatemala,latin_america,unlinked,184,1101.9,True,False,False,False,True
+GV,guinea,Guinea,africa_mideast,unlinked,184,842.2,True,False,False,False,True
+GY,guyana,Guyana,latin_america,unlinked,184,583.7,True,False,False,False,True
+HA,haiti,Haiti,latin_america,unlinked,184,1584.4,True,False,False,False,True
+HK,hong_kong,Hong Kong,asia_pacific,pegged,184,7897.8,True,True,False,True,True
+HO,honduras,Honduras,latin_america,unlinked,184,885.8,True,False,False,False,True
+HR,croatia,Croatia,europe,floating,184,7367.1,True,True,False,True,True
+HU,hungary,Hungary,europe,unlinked,184,11013.9,True,False,False,False,True
+IC,iceland,Iceland,europe,unlinked,184,1360.3,True,False,False,False,True
+ID,indonesia,Indonesia,asia_pacific,floating,184,38092.0,True,False,True,True,True
+IN,india,India,asia_pacific,floating,184,83110.6,True,True,True,True,True
+IR,iran,Iran,africa_mideast,unlinked,184,166637.1,True,False,False,False,True
+IS,israel,Israel,africa_mideast,floating,184,77827.4,True,False,True,True,True
+IT,italy,Italy,europe,floating,184,68571.7,True,True,True,True,True
+IV,cote_divoire,Cote d'Ivoire,africa_mideast,pegged,184,495.6,True,True,False,True,True
+IZ,iraq,Iraq,africa_mideast,unlinked,184,9599.8,True,False,False,False,True
+JA,japan,Japan,asia_pacific,floating,184,36182.9,True,True,True,True,True
+JM,jamaica,Jamaica,latin_america,unlinked,184,881.7,True,False,False,False,True
+JO,jordan,Jordan,africa_mideast,pegged,184,4394.6,True,False,False,False,True
+KE,kenya,Kenya,africa_mideast,unlinked,184,3605.4,True,False,False,False,True
+KG,kyrgyzstan,Kyrgyzstan,asia_pacific,unlinked,184,1498.6,True,False,False,False,True
+KN,north_korea,North Korea,asia_pacific,unlinked,184,2873.7,True,False,False,False,True
+KR,kiribati,Kiribati,asia_pacific,floating,182,29.9,True,True,False,True,True
+KS,south_korea,South Korea,asia_pacific,floating,184,20815.8,True,True,True,True,True
+KU,kuwait,Kuwait,africa_mideast,unlinked,184,3898.6,True,False,False,False,True
+KV,kosovo,Kosovo,europe,floating,184,3083.9,True,True,False,True,True
+KZ,kazakhstan,Kazakhstan,asia_pacific,unlinked,184,2791.3,True,False,False,False,True
+LA,laos,Laos,asia_pacific,unlinked,184,721.6,True,False,False,False,True
+LE,lebanon,Lebanon,africa_mideast,unlinked,184,23003.8,True,False,False,False,True
+LG,latvia,Latvia,europe,floating,184,2783.0,True,True,False,True,True
+LH,lithuania,Lithuania,europe,floating,184,6927.4,True,True,False,True,True
+LI,liberia,Liberia,africa_mideast,unlinked,184,840.7,True,False,False,False,True
+LO,slovakia,Slovakia,europe,floating,184,2299.6,True,True,False,True,True
+LS,liechtenstein,Liechtenstein,europe,floating,184,108.7,True,True,False,True,True
+LT,lesotho,Lesotho,africa_mideast,pegged,184,148.0,True,True,False,True,True
+LU,luxembourg,Luxembourg,europe,floating,184,1182.1,True,True,False,True,True
+LY,libya,Libya,africa_mideast,unlinked,184,2118.5,True,False,False,False,True
+MA,madagascar,Madagascar,africa_mideast,unlinked,184,376.2,True,False,False,False,True
+MC,macau,Macau,asia_pacific,unlinked,184,825.2,True,False,False,False,True
+MD,moldova,Moldova,europe,unlinked,184,4140.0,True,False,False,False,True
+MG,mongolia,Mongolia,asia_pacific,unlinked,184,1071.7,True,False,False,False,True
+MI,malawi,Malawi,africa_mideast,unlinked,184,615.5,True,False,False,False,True
+MJ,montenegro,Montenegro,europe,floating,184,824.6,True,True,False,True,True
+MK,north_macedonia,North Macedonia,europe,unlinked,184,5787.2,True,False,False,False,True
+ML,mali,Mali,africa_mideast,pegged,184,1460.9,True,True,False,True,True
+MN,monaco,Monaco,europe,floating,184,977.1,True,True,False,True,True
+MO,morocco,Morocco,africa_mideast,unlinked,184,6786.8,True,False,False,False,True
+MP,mauritius,Mauritius,africa_mideast,unlinked,184,1186.2,True,False,False,False,True
+MR,mauritania,Mauritania,africa_mideast,unlinked,184,488.7,True,False,False,False,True
+MT,malta,Malta,europe,floating,184,694.3,True,True,False,True,True
+MU,oman,Oman,africa_mideast,pegged,184,3795.3,True,False,False,False,True
+MV,maldives,Maldives,asia_pacific,unlinked,184,511.8,True,False,False,False,True
+MX,mexico,Mexico,north_america,floating,184,41531.8,True,True,True,True,True
+MY,malaysia,Malaysia,asia_pacific,floating,184,4125.0,True,True,True,True,True
+MZ,mozambique,Mozambique,africa_mideast,unlinked,184,462.0,True,False,False,False,True
+NG,niger,Niger,africa_mideast,pegged,184,604.8,True,True,False,True,True
+NH,vanuatu,Vanuatu,asia_pacific,unlinked,184,166.8,True,False,False,False,True
+NI,nigeria,Nigeria,africa_mideast,unlinked,184,14457.9,True,False,False,False,True
+NL,netherlands,Netherlands,europe,floating,184,9339.7,True,True,True,True,True
+NO,norway,Norway,europe,floating,184,7215.0,True,True,True,True,True
+NP,nepal,Nepal,asia_pacific,pegged,184,4870.2,True,True,False,True,True
+NR,nauru,Nauru,asia_pacific,floating,183,65.3,True,True,False,True,True
+NS,suriname,Suriname,latin_america,unlinked,184,259.1,True,False,False,False,True
+NU,nicaragua,Nicaragua,latin_america,unlinked,184,592.1,True,False,False,False,True
+NZ,new_zealand,New Zealand,asia_pacific,floating,184,6664.6,True,True,True,True,True
+OD,south_sudan,South Sudan,africa_mideast,unlinked,184,484.7,True,False,False,False,True
+PA,paraguay,Paraguay,latin_america,unlinked,184,2122.2,True,False,False,False,True
+PE,peru,Peru,latin_america,floating,184,7448.1,True,False,True,True,True
+PK,pakistan,Pakistan,asia_pacific,unlinked,184,20290.8,True,False,False,False,True
+PL,poland,Poland,europe,floating,184,17002.6,True,False,True,True,True
+PM,panama,Panama,latin_america,dollarized,184,2191.8,True,False,False,False,True
+PO,portugal,Portugal,europe,floating,184,10440.3,True,True,False,True,True
+PP,papua_new_guinea,Papua New Guinea,asia_pacific,unlinked,184,349.5,True,False,False,False,True
+PS,palau,Palau,asia_pacific,dollarized,184,209.2,True,False,False,False,True
+PU,guinea_bissau,Guinea-Bissau,africa_mideast,pegged,184,116.3,True,True,False,True,True
+QA,qatar,Qatar,africa_mideast,pegged,184,6874.9,True,False,False,False,True
+RI,serbia,Serbia,europe,unlinked,184,7036.5,True,False,False,False,True
+RM,marshall_islands,Marshall Islands,asia_pacific,dollarized,184,70.9,True,False,False,False,True
+RO,romania,Romania,europe,unlinked,184,19689.9,True,False,False,False,True
+RP,philippines,Philippines,asia_pacific,floating,184,7619.8,True,False,True,True,True
+RS,russia,Russia,europe,unlinked,184,112810.4,True,False,False,False,True
+RW,rwanda,Rwanda,africa_mideast,unlinked,184,833.6,True,False,False,False,True
+SA,saudi_arabia,Saudi Arabia,africa_mideast,pegged,184,14328.5,True,False,True,True,True
+SC,saint_kitts_and_nevis,Saint Kitts and Nevis,latin_america,pegged,171,26.2,True,False,False,False,True
+SE,seychelles,Seychelles,africa_mideast,unlinked,184,303.4,True,False,False,False,True
+SF,south_africa,South Africa,africa_mideast,floating,184,7593.6,True,True,True,True,True
+SG,senegal,Senegal,africa_mideast,pegged,184,2162.8,True,True,False,True,True
+SI,slovenia,Slovenia,europe,floating,184,2748.5,True,True,False,True,True
+SL,sierra_leone,Sierra Leone,africa_mideast,unlinked,184,192.4,True,False,False,False,True
+SM,san_marino,San Marino,europe,floating,184,40.3,True,True,False,True,True
+SN,singapore,Singapore,asia_pacific,floating,184,4200.6,True,True,True,True,True
+SO,somalia,Somalia,africa_mideast,unlinked,184,1300.4,True,False,False,False,True
+SP,spain,Spain,europe,floating,184,56963.4,True,True,True,True,True
+ST,saint_lucia,Saint Lucia,latin_america,pegged,184,54.9,True,False,False,False,True
+SU,sudan,Sudan,africa_mideast,unlinked,184,2748.6,True,False,False,False,True
+SW,sweden,Sweden,europe,floating,184,16324.3,True,True,True,True,True
+SY,syria,Syria,africa_mideast,unlinked,184,6827.6,True,False,False,False,True
+SZ,switzerland,Switzerland,europe,floating,184,12760.4,True,True,True,True,True
+TD,trinidad_and_tobago,Trinidad and Tobago,latin_america,unlinked,184,300.8,True,False,False,False,True
+TH,thailand,Thailand,asia_pacific,floating,184,9271.6,True,True,True,True,True
+TI,tajikistan,Tajikistan,asia_pacific,unlinked,184,482.5,True,False,False,False,True
+TN,tonga,Tonga,asia_pacific,unlinked,184,131.4,True,False,False,False,True
+TO,togo,Togo,africa_mideast,pegged,184,178.6,True,True,False,True,True
+TP,sao_tome_and_principe,Sao Tome and Principe,africa_mideast,unlinked,184,60.7,True,False,False,False,True
+TS,tunisia,Tunisia,africa_mideast,unlinked,184,2059.1,True,False,False,False,True
+TT,timor_leste,Timor-Leste,asia_pacific,dollarized,184,202.9,True,False,False,False,True
+TU,turkey,Turkey,europe,floating,184,49707.6,True,False,True,True,True
+TV,tuvalu,Tuvalu,asia_pacific,floating,184,58.9,True,True,False,True,True
+TW,taiwan,Taiwan,asia_pacific,floating,184,29440.8,True,True,True,True,True
+TX,turkmenistan,Turkmenistan,asia_pacific,unlinked,184,483.8,True,False,False,False,True
+TZ,tanzania,Tanzania,africa_mideast,unlinked,184,909.7,True,False,False,False,True
+UG,uganda,Uganda,africa_mideast,unlinked,184,2140.0,True,False,False,False,True
+UK,united_kingdom,United Kingdom,europe,floating,184,95581.7,True,True,True,True,True
+UP,ukraine,Ukraine,europe,unlinked,184,85004.0,True,False,False,False,True
+US,united_states,United States,north_america,floating,184,371389.4,True,False,True,True,True
+UV,burkina_faso,Burkina Faso,africa_mideast,pegged,184,516.3,True,True,False,True,True
+UY,uruguay,Uruguay,latin_america,unlinked,184,1953.6,True,False,False,False,True
+UZ,uzbekistan,Uzbekistan,asia_pacific,unlinked,184,1389.5,True,False,False,False,True
+VC,saint_vincent_and_the_grenadines,Saint Vincent and the Grenadines,latin_america,pegged,184,180.9,True,False,False,False,True
+VE,venezuela,Venezuela,latin_america,unlinked,184,15244.8,True,False,False,False,True
+VM,vietnam,Vietnam,asia_pacific,unlinked,184,21592.0,True,False,False,False,True
+WA,namibia,Namibia,africa_mideast,pegged,184,658.0,True,True,False,True,True
+WS,samoa,Samoa,asia_pacific,unlinked,184,139.6,True,False,False,False,True
+WZ,eswatini,Eswatini,africa_mideast,pegged,179,23.1,True,True,False,True,True
+YM,yemen,Yemen,africa_mideast,unlinked,184,2513.9,True,False,False,False,True
+ZA,zambia,Zambia,africa_mideast,unlinked,184,724.8,True,False,False,False,True
+ZI,zimbabwe,Zimbabwe,africa_mideast,unlinked,184,1309.1,True,False,False,False,True

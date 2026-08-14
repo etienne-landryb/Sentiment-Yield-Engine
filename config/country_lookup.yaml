@@ -2,7 +2,7 @@
 # full sourcing/citations. Candidate universe for the coverage-driven panel;
 # scripts/profile_coverage.py TEST-FETCHES every fred_fx/td_index candidate and
 # keeps only what returns real data — nothing here is asserted to work.
-# 198 countries generated; 63 coverage codes intentionally
+# 197 countries generated; 64 coverage codes intentionally
 # excluded (legacy/duplicate codes, disputed/uninhabited territories, non-UN-member
 # dependencies) — see DROP_*_NOTE dicts in this script for the documented reason
 # for each.
@@ -19,12 +19,12 @@ countries:
   label: Antigua and Barbuda
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: AE
   id: united_arab_emirates
   label: United Arab Emirates
@@ -228,12 +228,12 @@ countries:
   label: Bosnia and Herzegovina
   region: europe
   currency: BAM
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: EUR
+  peg_rate: '1.95583'
+  fred_fx: DEXUSEU
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to EUR (fixed rate)
 - code: BL
   id: bolivia
   label: Bolivia
@@ -305,23 +305,23 @@ countries:
   label: Bhutan
   region: asia_pacific
   currency: BTN
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: INR
+  peg_rate: '1:1'
+  fred_fx: DEXINUS
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to INR (fixed rate)
 - code: BU
   id: bulgaria
   label: Bulgaria
   region: europe
-  currency: BGN
-  monetary_regime: unlinked
+  currency: EUR
+  monetary_regime: floating
   peg_to: null
   peg_rate: null
-  fred_fx: null
+  fred_fx: DEXUSEU
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Own currency
 - code: BX
   id: brunei
   label: Brunei
@@ -448,12 +448,12 @@ countries:
   label: Comoros
   region: africa_mideast
   currency: KMF
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: EUR
+  peg_rate: '491.96775'
+  fred_fx: DEXUSEU
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to EUR (fixed rate)
 - code: CO
   id: colombia
   label: Colombia
@@ -547,12 +547,12 @@ countries:
   label: Dominica
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: DR
   id: dominican_republic
   label: Dominican Republic
@@ -756,12 +756,12 @@ countries:
   label: Grenada
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: GM
   id: germany
   label: Germany
@@ -1163,12 +1163,12 @@ countries:
   label: Lesotho
   region: africa_mideast
   currency: LSL
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: ZAR
+  peg_rate: '1:1'
+  fred_fx: DEXSFUS
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to ZAR (fixed rate)
 - code: LU
   id: luxembourg
   label: Luxembourg
@@ -1449,12 +1449,12 @@ countries:
   label: Nepal
   region: asia_pacific
   currency: NPR
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: INR
+  peg_rate: 1.6:1
+  fred_fx: DEXINUS
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to INR (fixed rate)
 - code: NR
   id: nauru
   label: Nauru
@@ -1702,12 +1702,12 @@ countries:
   label: Saint Kitts and Nevis
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: SE
   id: seychelles
   label: Seychelles
@@ -1812,12 +1812,12 @@ countries:
   label: Saint Lucia
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: SU
   id: sudan
   label: Sudan
@@ -2088,12 +2088,12 @@ countries:
   label: Saint Vincent and the Grenadines
   region: latin_america
   currency: XCD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
+  monetary_regime: pegged
+  peg_to: USD
+  peg_rate: '2.70'
   fred_fx: null
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to USD (fixed rate)
 - code: VE
   id: venezuela
   label: Venezuela
@@ -2116,28 +2116,17 @@ countries:
   fred_fx: null
   td_index: null
   label_note: Sentiment-only — no reliable market series currently sourced
-- code: VT
-  id: vatican_city
-  label: Vatican City
-  region: europe
-  currency: EUR
-  monetary_regime: floating
-  peg_to: null
-  peg_rate: null
-  fred_fx: DEXUSEU
-  td_index: null
-  label_note: Own currency
 - code: WA
   id: namibia
   label: Namibia
   region: africa_mideast
   currency: NAD
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: ZAR
+  peg_rate: '1:1'
+  fred_fx: DEXSFUS
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to ZAR (fixed rate)
 - code: WS
   id: samoa
   label: Samoa
@@ -2154,12 +2143,12 @@ countries:
   label: Eswatini
   region: africa_mideast
   currency: SZL
-  monetary_regime: unlinked
-  peg_to: null
-  peg_rate: null
-  fred_fx: null
+  monetary_regime: pegged
+  peg_to: ZAR
+  peg_rate: '1:1'
+  fred_fx: DEXSFUS
   td_index: null
-  label_note: Sentiment-only — no reliable market series currently sourced
+  label_note: Pegged to ZAR (fixed rate)
 - code: YM
   id: yemen
   label: Yemen
@@ -2196,6 +2185,7 @@ countries:
 euro_area_members:
 - austria
 - belgium
+- bulgaria
 - cyprus
 - ireland
 - estonia

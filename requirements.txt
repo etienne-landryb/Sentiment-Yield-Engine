@@ -23,6 +23,9 @@ pyarrow>=14.0
 # service account (GOOGLE_APPLICATION_CREDENTIALS). Only used by scripts/, never the app.
 google-cloud-bigquery>=3.20
 db-dtypes>=1.2
+
+# ISO 3166/4217 reference data for the UN-member country panel (scripts/ only).
+pycountry>=24.0
 # yfinance is retained ONLY for the legacy fetch path exercised by the frozen
 # methodology test (tests/test_methodology.py); the live pipeline does not use it.
 yfinance>=0.2.40
