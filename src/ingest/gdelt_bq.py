@@ -32,10 +32,11 @@ TABLE = "gdelt-bq.gdeltv2.gkg_partitioned"
 _CC_OFFSET = 2                      # country-code position after SPLIT(loc, '#')
 _ECON_THEME_RE = r"ECON_|WB_|EPU_"  # optional economic-theme filter
 
-# Hard per-query ceiling. Tune via env if needed; defaults conservative relative to the
-# 1 TiB/month free tier — a single query should never need anywhere near this much given
-# the _PARTITIONDATE filter already in place on every query.
-_DEFAULT_MAX_BYTES_BILLED = 50 * 1024 ** 3  # 50 GB per query
+# Hard per-query ceiling. 160 GB gives headroom above the themes query's observed ~80 GB
+# need (UNNEST over V2Themes scans more per-row than the tone query), while still being a
+# small fraction of the 1 TiB/month free tier and a real backstop against a genuinely
+# runaway/unfiltered query (which would scan hundreds of GB to TB, not 160 GB).
+_DEFAULT_MAX_BYTES_BILLED = 160 * 1024 ** 3  # 160 GB per query
 
 
 def available() -> bool:
