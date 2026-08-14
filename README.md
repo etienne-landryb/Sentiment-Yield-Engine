@@ -489,3 +489,4 @@ relying on any output.
 ## Author
 Etienne Landry Bessala 
 (etienne.landry.bessala@gmail.com)
+"# Sentiment-Yield-Engine" 
