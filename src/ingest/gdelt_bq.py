@@ -13,6 +13,10 @@ GKG layout assumption (VERIFY with verify_offset() before trusting output): each
 `;`-separated entry in V2Locations splits on `#` as Type#FullName#CountryCode#ADM1#…,
 so the FIPS 10-4 2-char country code is at SAFE_OFFSET(2). If your inspection shows a
 different offset, change _CC_OFFSET below — it is referenced by every query.
+
+BYTE CAP: every query also carries `maximum_bytes_billed` (see `_job_config`) — a hard
+technical backstop alongside (not instead of) a GCP billing alert set on the console. If
+a query would scan more than the cap it errors immediately, unbilled, instead of running.
 """
 from __future__ import annotations
 
@@ -27,6 +31,11 @@ log = logging.getLogger(__name__)
 TABLE = "gdelt-bq.gdeltv2.gkg_partitioned"
 _CC_OFFSET = 2                      # country-code position after SPLIT(loc, '#')
 _ECON_THEME_RE = r"ECON_|WB_|EPU_"  # optional economic-theme filter
+
+# Hard per-query ceiling. Tune via env if needed; defaults conservative relative to the
+# 1 TiB/month free tier — a single query should never need anywhere near this much given
+# the _PARTITIONDATE filter already in place on every query.
+_DEFAULT_MAX_BYTES_BILLED = 50 * 1024 ** 3  # 50 GB per query
 
 
 def available() -> bool:
@@ -46,11 +55,26 @@ def _client():
     return bigquery.Client()
 
 
-def _run(sql: str, params: list) -> pd.DataFrame:
+def _job_config(**kwargs) -> "bigquery.QueryJobConfig":
+    """The one place every query's job config is built — always carries the byte cap."""
     from google.cloud import bigquery
 
-    job = _client().query(sql, job_config=bigquery.QueryJobConfig(query_parameters=params))
-    return job.result().to_dataframe(create_bqstorage_client=False)
+    max_bytes = int(env("BQ_MAX_BYTES_BILLED", _DEFAULT_MAX_BYTES_BILLED))
+    return bigquery.QueryJobConfig(maximum_bytes_billed=max_bytes, **kwargs)
+
+
+def _run(sql: str, params: list) -> pd.DataFrame:
+    max_bytes = int(env("BQ_MAX_BYTES_BILLED", _DEFAULT_MAX_BYTES_BILLED))
+    try:
+        job = _client().query(sql, job_config=_job_config(query_parameters=params))
+        return job.result().to_dataframe(create_bqstorage_client=False)
+    except Exception as exc:
+        msg = str(exc).lower()
+        if "bytes billed" in msg or "maximum bytes billed" in msg:
+            log.error("Query exceeded the byte cap (%s bytes) — likely missing/wrong "
+                      "partition filter, not a transient failure. Query: %s",
+                      max_bytes, sql[:200])
+        raise
 
 
 def _codes_param(codes):
