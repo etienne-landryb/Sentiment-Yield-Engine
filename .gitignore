@@ -23,6 +23,11 @@ data/cache/*
 !data/processed/.gitkeep
 !data/cache/.gitkeep
 
+# Date-aware-themes staged rollout: local test artifacts only, never the real
+# themes.parquet — guards the Stage 0/1 isolation constraint at the tooling
+# level, not just by discipline.
+data/snapshot/*_test.parquet
+
 # OS / editors
 .DS_Store
 Thumbs.db

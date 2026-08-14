@@ -485,8 +485,21 @@ def build_country_from_snapshot(country_cfg: dict, snap: dict, period) -> dict:
             refreshed = str(r.iloc[0]["refreshed_at"])
 
     tdf = snap.get("themes", pd.DataFrame())
-    themes = (tdf[tdf["country_id"] == cid][["theme", "count"]].reset_index(drop=True)
-              if tdf is not None and not tdf.empty else pd.DataFrame(columns=["theme", "count"]))
+    if tdf is not None and not tdf.empty and "country_id" in tdf.columns:
+        trows = tdf[tdf["country_id"] == cid]
+        if "date" in trows.columns:
+            # Date-aware shape: slice to the selected period like sentiment/market,
+            # then re-aggregate — the word cloud shows this period's themes, not
+            # always the whole snapshot's 6-month total.
+            trows = trows.copy()
+            trows["date"] = pd.to_datetime(trows["date"]).dt.date
+            trows = trows[(trows["date"] >= start) & (trows["date"] <= end)]
+        # else: pre-date-aware flat [country_id, theme, count] shape — no period
+        # dimension to slice, fall back to the whole-snapshot total (old behavior).
+        themes = (trows.groupby("theme", as_index=False)["count"].sum()
+                  .sort_values("count", ascending=False).reset_index(drop=True))
+    else:
+        themes = pd.DataFrame(columns=["theme", "count"])
 
     return {
         "country_id": cid,

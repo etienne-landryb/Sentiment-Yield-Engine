@@ -10,6 +10,7 @@ Usage:
     python scripts/backfill.py --months 6
     python scripts/backfill.py --months 6 --econ-only
     python scripts/backfill.py --market-only          # refetch only market series
+    python scripts/backfill.py --themes-only --months 6   # refetch only themes (date-aware)
     python scripts/backfill.py --demo                 # synthetic seed (no network)
 
 Requires GOOGLE_APPLICATION_CREDENTIALS (BigQuery) + TWELVE_DATA_API_KEY (indices).
@@ -39,6 +40,26 @@ def _code_to_id() -> dict:
             for c in settings.countries() if c.get("gdelt", {}).get("source_country")}
 
 
+def fetch_all_themes(start, end, top_k: int = 20) -> pd.DataFrame:
+    """Date-aware BigQuery themes for every configured country → [country_id, date, theme, count].
+
+    Top-K per (country, date) — the long tail of single-digit-count themes is
+    noise with no analytical value and would otherwise multiply row count for
+    nothing. Shared by the full backfill path and --themes-only.
+    """
+    from src.ingest import gdelt_bq
+
+    if not gdelt_bq.available():
+        raise RuntimeError("BigQuery unavailable — set GOOGLE_APPLICATION_CREDENTIALS "
+                           "and `pip install google-cloud-bigquery db-dtypes`.")
+    code2id = _code_to_id()
+    codes = list(code2id)
+    print(f"  BigQuery themes (date-aware, top-{top_k}/day) for {len(codes)} countries …")
+    themes = gdelt_bq.fetch_themes_daily(codes, start, end, top=top_k)
+    themes["country_id"] = themes["country_code"].map(code2id)
+    return themes.dropna(subset=["country_id"])[snapshot.THEMES_COLS].reset_index(drop=True)
+
+
 def fetch_all_sentiment(start, end, econ_only: bool) -> tuple[pd.DataFrame, pd.DataFrame]:
     """BigQuery tone + themes for every configured country → (sentiment, themes)."""
     from src.ingest import gdelt_bq
@@ -51,13 +72,10 @@ def fetch_all_sentiment(start, end, econ_only: bool) -> tuple[pd.DataFrame, pd.D
     print(f"  BigQuery tone for {len(codes)} countries (econ_only={econ_only}) …")
     tone = gdelt_bq.fetch_tone(codes, start, end, econ_only=econ_only)
     tone["country_id"] = tone["country_code"].map(code2id)
-    tone = tone.dropna(subset=["country_id"])[snapshot.SENTIMENT_COLS]
+    tone = tone.dropna(subset=["country_id"])[snapshot.SENTIMENT_COLS].reset_index(drop=True)
 
-    print("  BigQuery themes …")
-    themes = gdelt_bq.fetch_themes(codes, start, end)
-    themes["country_id"] = themes["country_code"].map(code2id)
-    themes = themes.dropna(subset=["country_id"])[snapshot.THEMES_COLS]
-    return tone.reset_index(drop=True), themes.reset_index(drop=True)
+    themes = fetch_all_themes(start, end)
+    return tone, themes
 
 
 def fetch_country_market(country: dict, start, end) -> pd.DataFrame:
@@ -104,7 +122,8 @@ def _seed_from_demo(ids) -> tuple[pd.DataFrame, pd.DataFrame]:
             pd.concat(m_rows, ignore_index=True) if m_rows else pd.DataFrame(columns=snapshot.MARKET_COLS))
 
 
-def run(months: int, ids: list[str] | None, demo: bool, econ_only: bool, market_only: bool) -> None:
+def run(months: int, ids: list[str] | None, demo: bool, econ_only: bool,
+        market_only: bool, themes_only: bool) -> None:
     end = date.today()
     start = end - timedelta(days=int(months * 30.5))
 
@@ -120,6 +139,14 @@ def run(months: int, ids: list[str] | None, demo: bool, econ_only: bool, market_
         print("Refetching market only; keeping stored sentiment + themes …")
         sentiment, themes = snap["sentiment"], snap.get("themes")
         market = fetch_all_market(start, end)
+    elif themes_only:
+        snap = snapshot.load_snapshot()
+        if snap is None:
+            print("--themes-only but no existing snapshot; run a full backfill first.")
+            sys.exit(2)
+        print("Refetching themes only (date-aware); keeping stored sentiment + market …")
+        sentiment, market = snap["sentiment"], snap["market"]
+        themes = fetch_all_themes(start, end)
     else:
         sentiment, themes = fetch_all_sentiment(start, end, econ_only)
         market = fetch_all_market(start, end)
@@ -141,6 +168,8 @@ if __name__ == "__main__":
     ap.add_argument("--demo", action="store_true", help="seed from synthetic data, no network")
     ap.add_argument("--econ-only", action="store_true", help="restrict tone to economic-themed articles")
     ap.add_argument("--market-only", action="store_true", help="refetch only market series")
+    ap.add_argument("--themes-only", action="store_true",
+                     help="refetch only themes (date-aware); keeps stored sentiment + market")
     args = ap.parse_args()
     ids = [x.strip() for x in args.countries.split(",") if x.strip()] or None
-    run(args.months, ids, args.demo, args.econ_only, args.market_only)
+    run(args.months, ids, args.demo, args.econ_only, args.market_only, args.themes_only)

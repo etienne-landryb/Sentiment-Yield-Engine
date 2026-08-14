@@ -1,9 +1,10 @@
 """Stored snapshot the app reads instead of hitting GDELT/markets live.
 
-Three tidy tables (one parquet each under data/snapshot/):
-  sentiment : [country_id, date, gdelt_tone, article_count]   # daily, from timelinetone
-  market    : [country_id, instrument_label, date, value]     # daily returns / yield change
-  meta      : [country_id, series, last_date, refreshed_at]   # what's current per series
+Four tidy tables (one parquet each under data/snapshot/):
+  sentiment : [country_id, date, gdelt_tone, article_count]     # daily, from timelinetone
+  market    : [country_id, instrument_label, date, value]       # daily returns / yield change
+  themes    : [country_id, date, theme, count]                  # daily, top-K per (country, date)
+  meta      : [country_id, series, last_date, refreshed_at]     # what's current per series
 
 Country/instrument DEFINITIONS still live in config/regions.yaml (single source of
 truth); the snapshot holds only time series. The scheduled backfill/refresh jobs
@@ -16,12 +17,14 @@ from pathlib import Path
 
 import pandas as pd
 
+from src.settings import env
+
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT_DIR = ROOT / "data" / "snapshot"
 
 SENTIMENT_COLS = ["country_id", "date", "gdelt_tone", "article_count"]
 MARKET_COLS = ["country_id", "instrument_label", "date", "value"]
-THEMES_COLS = ["country_id", "theme", "count"]
+THEMES_COLS = ["country_id", "date", "theme", "count"]
 META_COLS = ["country_id", "series", "last_date", "refreshed_at"]
 
 _FILES = {"sentiment": "sentiment.parquet", "market": "market.parquet",
@@ -31,6 +34,15 @@ _COLS = {"sentiment": SENTIMENT_COLS, "market": MARKET_COLS,
 
 
 def _path(table: str) -> Path:
+    if table == "themes":
+        # Local-testing-only override for the date-aware-themes staged rollout
+        # (see CLAUDE.md) — lets the app read a test file (e.g.
+        # themes_v2_test.parquet) without touching the production read path.
+        # Unset in normal operation; production always reads themes.parquet.
+        override = env("THEMES_SNAPSHOT_FILE")
+        if override:
+            p = Path(override)
+            return p if p.is_absolute() else SNAPSHOT_DIR / override
     return SNAPSHOT_DIR / _FILES[table]
 
 
@@ -50,8 +62,8 @@ def load_snapshot() -> dict | None:
     if not has_snapshot():
         return None
     out = {}
-    for table, fname in _FILES.items():
-        p = SNAPSHOT_DIR / fname
+    for table in _FILES:
+        p = _path(table)
         if p.exists():
             df = pd.read_parquet(p)
             if "date" in df:

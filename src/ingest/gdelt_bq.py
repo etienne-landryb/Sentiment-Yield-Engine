@@ -197,3 +197,44 @@ def fetch_themes(codes, start, end, top: int = 60) -> pd.DataFrame:
         ORDER BY country_code, count DESC
     """
     return _run(sql, [_codes_param(codes), *_date_params(start, end)])
+
+
+def fetch_themes_daily(codes, start, end, top: int = 20) -> pd.DataFrame:
+    """Per-country-per-day theme frequencies, top-K per (country, date) →
+    [country_code, date, theme, count].
+
+    Date-aware sibling of fetch_themes() — same theme extraction (offset already
+    stripped via SAFE_OFFSET(0), see fetch_themes' docstring), but grouped by date
+    as well as country/theme so a spike can be dated instead of only seen as a
+    6-month total. `top` bounds row count per (country, date): the long tail of
+    single-digit-count themes is noise with no analytical value and would
+    otherwise multiply row count for nothing (countries × days × top, not
+    countries × days × all-themes-ever-seen-that-day).
+    """
+    sql = f"""
+        WITH t AS (
+          SELECT
+            PARSE_DATE('%Y%m%d', SUBSTR(CAST(DATE AS STRING), 1, 8)) AS date,
+            SPLIT(loc, '#')[SAFE_OFFSET({_CC_OFFSET})] AS country_code,
+            SPLIT(theme_raw, ',')[SAFE_OFFSET(0)] AS theme
+          FROM `{TABLE}`,
+               UNNEST(SPLIT(V2Locations, ';')) AS loc,
+               UNNEST(SPLIT(V2Themes, ';')) AS theme_raw
+          WHERE _PARTITIONDATE BETWEEN @start AND @end
+            AND V2Locations IS NOT NULL AND V2Themes IS NOT NULL
+        ),
+        counted AS (
+          SELECT country_code, date, theme, COUNT(*) AS count
+          FROM t
+          WHERE country_code IN UNNEST(@codes) AND country_code != '' AND theme != ''
+          GROUP BY country_code, date, theme
+        )
+        SELECT country_code, date, theme, count
+        FROM counted
+        QUALIFY ROW_NUMBER() OVER (PARTITION BY country_code, date ORDER BY count DESC) <= {int(top)}
+        ORDER BY country_code, date, count DESC
+    """
+    df = _run(sql, [_codes_param(codes), *_date_params(start, end)])
+    if not df.empty:
+        df["date"] = pd.to_datetime(df["date"]).dt.date
+    return df
