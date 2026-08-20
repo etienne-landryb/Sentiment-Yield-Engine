@@ -49,7 +49,7 @@ An open, global news-sentiment × financial-market observatory. Headline questio
 DATA_MODE = "snapshot"
 TWELVE_DATA_API_KEY = "..."
 GROQ_API_KEY = "..."
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "openai/gpt-oss-120b"
 ```
 
 `GCP_SA_KEY` is NOT needed in Streamlit secrets (snapshot mode never calls BigQuery live). It IS needed in GitHub Actions repository secrets, for the scheduled refresh workflow.

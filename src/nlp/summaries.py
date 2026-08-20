@@ -16,9 +16,12 @@ back to the deterministic fact sentences. summarize() never raises.
 from __future__ import annotations
 
 import json
+import logging
 import re
 
 from src.settings import env
+
+log = logging.getLogger(__name__)
 
 SYSTEM_PROMPT = (
     "You are an evidence-bound analyst for a news-sentiment observatory. You are "
@@ -68,26 +71,35 @@ def summarize(evidence: dict, facts: list[str], abstained: bool = False) -> dict
     if not api_key or not facts:
         return _fallback(facts, abstained)
 
+    model = env("GROQ_MODEL", "openai/gpt-oss-120b")
     try:
         from groq import Groq
 
         client = Groq(api_key=api_key)
-        model = env("GROQ_MODEL", "llama-3.3-70b-versatile")
         user = (
             "EVIDENCE (JSON):\n" + json.dumps(evidence, ensure_ascii=False)
             + "\n\nFACTS (already decided — restate only these; add no new numbers):\n"
             + "\n".join(f"- {f}" for f in facts)
         )
+        kwargs = {}
+        if "gpt-oss" in model:
+            # gpt-oss spends part of max_tokens on hidden reasoning before writing
+            # output; keep effort low and drop the reasoning trace from the response
+            # so the 800-token budget goes to the actual JSON summary.
+            kwargs["reasoning_effort"] = "low"
+            kwargs["include_reasoning"] = False
         resp = client.chat.completions.create(
             model=model,
             messages=[{"role": "system", "content": SYSTEM_PROMPT},
                       {"role": "user", "content": user}],
             temperature=0.2,
-            max_tokens=500,
+            max_tokens=800,
             response_format={"type": "json_object"},
+            **kwargs,
         )
         data = json.loads(resp.choices[0].message.content)
     except Exception:
+        log.exception("Grounded summary LLM call failed (model=%s)", model)
         return _fallback(facts, abstained)
 
     # ── post-validation with fallback ────────────────────────────────────────
