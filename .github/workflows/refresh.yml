@@ -33,6 +33,14 @@ jobs:
         run: |
           echo '${{ secrets.GCP_SA_KEY }}' > "${RUNNER_TEMP}/gcp_sa.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=${RUNNER_TEMP}/gcp_sa.json" >> "$GITHUB_ENV"
+          if [ ! -s "${RUNNER_TEMP}/gcp_sa.json" ]; then
+            echo "::error::GCP_SA_KEY secret is empty or unset — add it under repo Settings > Secrets and variables > Actions"
+            exit 1
+          fi
+          if ! python -c "import json; json.load(open('${RUNNER_TEMP}/gcp_sa.json'))" 2>/dev/null; then
+            echo "::error::GCP_SA_KEY secret is not valid JSON — check it was pasted in full (the raw service-account key file contents)"
+            exit 1
+          fi
 
       - name: Refresh snapshot
         env:
